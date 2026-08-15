@@ -1,0 +1,18 @@
+[project]
+name = "agentic_ai"
+version = "0.1.0"
+description = "Just a demo learning project"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "faiss-cpu>=1.15.0",
+    "langchain>=1.3.15",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.5.5",
+    "langchain-google-genai>=4.3.4",
+    "langchain-groq>=1.1.3",
+    "langchain-openai>=1.5.1",
+    "langgraph>=1.2.11",
+    "streamlit>=1.61.1",
+    "tavily-python>=0.7.27",
+]
