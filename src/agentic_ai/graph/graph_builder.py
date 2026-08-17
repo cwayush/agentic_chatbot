@@ -2,6 +2,7 @@ from langgraph.graph import START,END
 from langgraph.graph import StateGraph
 from src.agentic_ai.states.state import State
 from langgraph.prebuilt import tools_condition
+from src.agentic_ai.nodes.ai_news_node import AI_News_Node
 from src.agentic_ai.nodes.chatbot_node import Chatbot_Node
 from src.agentic_ai.tools.search_tool import get_tools, create_tool_node
 from src.agentic_ai.nodes.chatbot_with_Tool_node import Chatbot_with_ToolNode
@@ -18,15 +19,16 @@ class GraphBuilder:
         and integrates it into the graph. The chatbot node is set as both the 
         entry and exit point of the graph.
         """
+
         # Define the chatbot node
         self.chatbot_node=Chatbot_Node(self.llm)
 
         # Define Nodes in the graph
-        self.graph_builder.add_node("chatbot",self.chatbot_node.process)
+        self.graph_builder.add_node("chatbot", self.chatbot_node.process)
 
         # Define Edges in the graph
-        self.graph_builder.add_edge(START,"chatbot")
-        self.graph_builder.add_edge("chatbot",END)
+        self.graph_builder.add_edge(START, "chatbot")
+        self.graph_builder.add_edge("chatbot", END)
 
     def chatbot_with_tools_build_graph(self):
         """
@@ -46,22 +48,45 @@ class GraphBuilder:
         chatbot_node = obj_chatbot_with_node.create_chatbot(tools)
 
         # Define Nodes in the graph
-        self.graph_builder.add_node("chatbot",chatbot_node)
-        self.graph_builder.add_node("tools",tool_node)
+        self.graph_builder.add_node("chatbot", chatbot_node)
+        self.graph_builder.add_node("tools", tool_node)
 
         # Define Edges in the graph
-        self.graph_builder.add_edge(START,"chatbot")
+        self.graph_builder.add_edge(START, "chatbot")
         self.graph_builder.add_conditional_edges("chatbot",tools_condition)
-        self.graph_builder.add_edge("tools","chatbot")
- 
+        self.graph_builder.add_edge("tools", "chatbot")
+
+    def ai_news_build_graph(self):
+        """
+        Builds an advanced chatbot graph with summarise(AI News).
+        """
+        
+        # Define the AI_NEWS node
+        ai_news_node = AI_News_Node(self.llm)
+
+        # Define Nodes in the graph
+        self.graph_builder.add_node("fetch_news", ai_news_node.fetch_news)
+        self.graph_builder.add_node("summarize_news", ai_news_node.summarize_news)
+        self.graph_builder.add_node("save_result", ai_news_node.save_result)
+
+        # Define Edges in the graph
+        self.graph_builder.set_entry_point("fetch_news")
+        self.graph_builder.add_edge("fetch_news","summarize_news")
+        self.graph_builder.add_edge("summarize_news","save_result")
+        self.graph_builder.add_edge("save_result", END)
+    
     def setup_graph(self, usecase: str):
         """
         Sets up the graph for the selected use case.
         """
+
         if usecase == "Basic Chatbot":
             self.chatbot_build_graph()
 
         if usecase == "Chatbot With Tool":
             self.chatbot_with_tools_build_graph()
+
+        if usecase == "AI News":
+            self.ai_news_build_graph()
 
         return self.graph_builder.compile()

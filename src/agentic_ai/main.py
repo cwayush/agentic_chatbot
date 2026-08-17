@@ -21,13 +21,17 @@ def load_agenticai_app():
         st.error("Error: Failed to load user input from the UI.")
         return
     
-    user_message = st.chat_input("Enter your message:")
+    # Text input for user message
+    if st.session_state.IsFetchButtonClicked:
+        user_message = st.session_state.timeframe
+
+    else :
+        user_message = st.chat_input("Enter your message:")
 
     if user_message:
         try:
-
             # Configure The LLM's
-            obj_llm_config = GroqLLM(user_controls_input=user_input)
+            obj_llm_config = GroqLLM(user_controls_input = user_input)
             model = obj_llm_config.get_llm_model()
 
             if not model:
@@ -42,13 +46,13 @@ def load_agenticai_app():
                 return
 
             # Graph Builder
-            graph_builder=GraphBuilder(model)
+            graph_builder = GraphBuilder(model)
 
             try:
-                graph=graph_builder.setup_graph(usecase)
+                graph = graph_builder.setup_graph(usecase)
                 print(user_message)
 
-                Display_Streamlit_Result(usecase,graph,user_message).display_result_on_ui()
+                Display_Streamlit_Result(usecase, graph, user_message).display_result_on_ui()
 
             except Exception as e:
                 st.error(f"Error: Graph set up failed- {e}")
